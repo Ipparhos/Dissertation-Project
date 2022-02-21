@@ -20,9 +20,9 @@ loop_list = []                                                  #Here we save th
 static_potential_list = []                                      #Here we save the Static Potential measurements
 plaquete_size = N                                               #The size of the plaquete we want to loop around
 N_thermalazation = 500                                          #Number of configurations until thermalization
-N_Metropolis = 1                                                #Number of Metropolis iterations per configuration
-N_Overrelaxation = 0                                            #Number of Overrelaxation iterations per configuration
-N_Heatbath = 0                                                  #Number of Heatbath iterations per configuration
+N_Metropolis = 0                                                #Number of Metropolis iterations per configuration
+N_Overrelaxation = 1                                            #Number of Overrelaxation iterations per configuration
+N_Heatbath = 1                                                  #Number of Heatbath iterations per configuration
 
 
 
@@ -101,8 +101,7 @@ def Metropolis(t,x,y,z,mi):
     if ( (dS > 0.0) and (np.exp(-dS) < np.random.uniform(0,1)) ):
         U[t,x,y,z,mi] = old_link
 
-    if np.array_equal(U[t,x,y,z,mi],old_link) == False:
-        U[t,x,y,z,mi] = U[t,x,y,z,mi].conj().T
+    
         
     #Checking for unitarity violation and re-unitarise if necessary
     U[t,x,y,z,mi] = check_unitarity(U[t,x,y,z,mi])
@@ -173,7 +172,7 @@ def measure_polyakov_loop():
 
 def measure_static_potential(): # runs for each N_configuration
     pmpn = np.zeros (N+1, np.complex128)
-    count = np.zeros (N+1, np.int8)
+    count = np.zeros (N+1, np.int64)
     pm = np.zeros((N,N,N),np.complex128)
     for x in range(N):
         for y in range(N):
@@ -237,7 +236,7 @@ def Average_Wilson_plaquette(i,j):
 
 def Wilson_loop_static_potential():
     W = np.zeros (N+1, np.complex128)
-    count = np.zeros (N+1, np.int8)
+    count = np.zeros (N+1, np.int64)
     for x in range(N):
         for y in range(N):
             for z in range(N):
@@ -278,36 +277,43 @@ def calculate_spatial_transporter(t,xm,ym,zm,xn,yn,zn):
 
 #Prints the average of Monte_Carlo_loop method
 def MCaverage():
-    sp = 0
+    sp = []
     sp_wilson = 0
-    sum = 0
-    p_av = 0
+    s = 0
+    p = 0
+    sum = []
+    p_av = []
     for i in range(N_configurations + N_thermalazation):
         update_lattice()
         
         #Start measuring after the N_thermalazation configurations
         if (i > N_thermalazation-1):
             # polyakov_loop = measure_polyakov_loop() 
-            sp = measure_static_potential()
+            sp.append(measure_static_potential())
             #sp_wilson = Wilson_loop_static_potential()
-            sum , p_av = Average_Wilson_plaquette(1,1)
-             
-            
-        #Printing the results
-        #Writing Static Potential            
-            f = open(f"SP_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "a")
-            f.write(f"{(sp[0]).real}\t{(sp[1]).real}\t{(sp[2]).real}\t{(sp[3]).real}\t{(sp[4]).real}\t{(sp[5]).real}\t{(sp[6]).real}\t{(sp[7]).real}\n")
-            f.close()
+            s , p = Average_Wilson_plaquette(1,1)
+            sum.append(s)
+            p_av.append(p)
 
-        #Writing Static Potential            
-            #f = open(f"SPW_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "a")
-            #f.write(f"{(sp_wilson[0]).real}\t{(sp_wilson[1]).real}\t{(sp_wilson[2]).real}\t{(sp_wilson[3]).real}\n")
-            #f.close()
+    #Printing the results
+    f = open(f"SP_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "w")
+    g = open(f"AP_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "w")             
+    for i in range (N_configurations):       
+    #Writing Static Potential            
+        
+        f.write(f"{(sp[i][0]).real}\t{(sp[i][1]).real}\t{(sp[i][2]).real}\t{(sp[i][3]).real}\t{(sp[i][4]).real}\t{(sp[i][5]).real}\t{(sp[i][6]).real}\t{(sp[i][7]).real}\n")
+        
+    #Writing Static Potential            
+        #f = open(f"SPW_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "a")
+        #f.write(f"{(sp_wilson[0]).real}\t{(sp_wilson[1]).real}\t{(sp_wilson[2]).real}\t{(sp_wilson[3]).real}\n")
+        #f.close()
 
-        #Writing Average Plaquette
-            f = open(f"AP_M{N_Metropolis}O{N_Overrelaxation}H{N_Heatbath}_N{N}_S{N_configurations}_b{beta}", "a")
-            f.write(f"{(sum).real}\t{(p_av[0]).real}\t{(p_av[1]).real}\t{(p_av[2]).real}\t{(p_av[3]).real}\t{(p_av[4]).real}\t{(p_av[5]).real}\t{(p_av[6]).real}\n")
-            f.close()
+    #Writing Average Plaquette
+        
+        g.write(f"{(sum[i]).real}\t{(p_av[i][0]).real}\t{(p_av[i][1]).real}\t{(p_av[i][2]).real}\t{(p_av[i][3]).real}\t{(p_av[i][4]).real}\t{(p_av[i][5]).real}\t{(p_av[i][6]).real}\n")
+
+    f.close()
+    g.close()
 
         
     
