@@ -1,5 +1,3 @@
-from pickle import FALSE
-from unittest import skip
 import numpy as np
 import matplotlib.pyplot as plt
 np.set_printoptions(precision=16)
@@ -13,13 +11,13 @@ N = 7                                                           # N is the numbe
 N_mi = 4                                                        #Number of mi, ni arguments
 group_dim = 2                                                   # group_dim is the dimensions of the lattice
 U = np.zeros ((N,N,N,N,N_mi,group_dim,group_dim), np.complex128)    #4D lattice link variables
-N_configurations = 10000                                            #Times of configurations(sweeps) we want to occure
-beta = 2.0                                                      #Coupling constant β
+N_configurations = 1                                            #Times of configurations(sweeps) we want to occure
+beta = 6.0                                                      #Coupling constant β
 eps = 0.24                                                      #Random parameter that controls the acceptance ratio
 loop_list = []                                                  #Here we save the Wilson Loop measurements
 static_potential_list = []                                      #Here we save the Static Potential measurements
 plaquete_size = N                                               #The size of the plaquete we want to loop around
-N_thermalazation = 500                                          #Number of configurations until thermalization
+N_thermalazation = 1                                          #Number of configurations until thermalization
 N_Metropolis = 0                                                #Number of Metropolis iterations per configuration
 N_Overrelaxation = 1                                            #Number of Overrelaxation iterations per configuration
 N_Heatbath = 1                                                  #Number of Heatbath iterations per configuration
@@ -207,12 +205,12 @@ def Average_Wilson_plaquette(i,j):
         for x in range(N):
             for y in range(N):
                 for z in range(N):
-                    for mi in range(N_mi-1):
-                        mi_hat = [0,0,0,0]
-                        mi_hat[mi] = 1
-                        for ni in range(mi+1,N_mi): 
-                            ni_hat = [0,0,0,0]
-                            ni_hat[ni] = 1
+                    for ni in range(N_mi-1):
+                        ni_hat = [0,0,0,0]
+                        ni_hat[ni] = 1
+                        for mi in range(ni+1,N_mi): 
+                            mi_hat = [0,0,0,0]
+                            mi_hat[mi] = 1
                             I=0
                             J=0
                             
@@ -310,7 +308,7 @@ def MCaverage():
 
     #Writing Average Plaquette
         
-        g.write(f"{(sum[i]).real}\t{(p_av[i][0]).real}\t{(p_av[i][1]).real}\t{(p_av[i][2]).real}\t{(p_av[i][3]).real}\t{(p_av[i][4]).real}\t{(p_av[i][5]).real}\t{(p_av[i][6]).real}\n")
+        g.write(f"{(sum[i]).real}\t{p_av}\n")
 
     f.close()
     g.close()

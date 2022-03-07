@@ -1,5 +1,3 @@
-from os import access
-from socketserver import UDPServer
 import numpy as np
 np.set_printoptions(precision=16)
 from random_su2 import*
@@ -13,7 +11,7 @@ group_dim = 2                                                   # group_dim is t
 U = np.zeros ((group_dim,group_dim,2*D+1,N**D+1), np.complex128)    #4D lattice link variables
 nn = np.zeros((2*D+1,N**D+1),np.int64)                             #Nearest neghbors
 N_configurations = 10000                                        #Times of configurations(sweeps) we want to occure
-beta = 3.0                                                      #Coupling constant β
+beta = 6.0                                                      #Coupling constant β
 eps = 0.24                                                      #Random parameter that controls the acceptance ratio
 loop_list = []                                                  #Here we save the Wilson Loop measurements
 static_potential_list = []                                      #Here we save the Static Potential measurements
